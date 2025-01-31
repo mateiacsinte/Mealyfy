@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,7 +41,9 @@ public class MealDTO {
         this.area = meal.getArea();
         this.instructions = meal.getInstructions();
         this.mealThumb = meal.getMealThumb();
-        this.ingredients = meal.getIngredients().stream().map(Ingredient::getName).toList();
+        this.ingredients = Optional.ofNullable(meal.getIngredients())
+                .map(list -> list.stream().map(Ingredient::getName).toList())
+                .orElse(null);
     }
 
     private String id;

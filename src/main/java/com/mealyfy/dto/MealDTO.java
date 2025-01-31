@@ -1,6 +1,8 @@
 package com.mealyfy.dto;
 
 import com.mealyfy.client.MealResponse;
+import com.mealyfy.model.Ingredient;
+import com.mealyfy.model.Meal;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +31,16 @@ public class MealDTO {
                         mealResponse.getStrIngredient15())
                 .filter(s -> s != null && !s.isEmpty())
                 .collect(Collectors.toList());
+    }
+
+    public MealDTO(Meal meal){
+        this.id = meal.getPublicId();
+        this.name = meal.getName();
+        this.category = meal.getCategory();
+        this.area = meal.getArea();
+        this.instructions = meal.getInstructions();
+        this.mealThumb = meal.getMealThumb();
+        this.ingredients = meal.getIngredients().stream().map(Ingredient::getName).toList();
     }
 
     private String id;

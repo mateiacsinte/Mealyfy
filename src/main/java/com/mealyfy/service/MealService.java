@@ -3,19 +3,29 @@ package com.mealyfy.service;
 import com.mealyfy.client.MealResponse;
 import com.mealyfy.dto.MealDTO;
 import com.mealyfy.client.MealClient;
+import com.mealyfy.model.Ingredient;
+import com.mealyfy.model.Meal;
+import com.mealyfy.repository.IngredientRepository;
+import com.mealyfy.repository.MealRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class MealService {
     private final MealClient mealClient;
+    private final MealRepository mealRepository;
+    private final IngredientRepository ingredientRepository;
 
-    public MealService(MealClient mealClient) {
+    public MealService(MealClient mealClient, MealRepository mealRepository, IngredientRepository ingredientRepository) {
         this.mealClient = mealClient;
+        this.mealRepository = mealRepository;
+        this.ingredientRepository = ingredientRepository;
+    }
+
+    public List<MealDTO> getMeals(){
+        return mealRepository.findAll().stream().map(MealDTO::new).toList();
     }
 
     public List<MealDTO> getRandomMeal() {
@@ -46,6 +56,33 @@ public class MealService {
         }
         return name.map(s -> mealClient.fetchMealsByName(s).stream().map(MealDTO::new).toList()).orElseGet(LinkedList::new);
 
+    }
+
+    public Meal addMealById(String mealId){
+        MealDTO mealDTO = new MealDTO(this.mealClient.fetchMealById(mealId));
+        Set<Ingredient> ingredients = new HashSet<>();
+
+
+        for(String ingredient: mealDTO.getIngredients()){
+            Optional<Ingredient> ingredientEntity = ingredientRepository.findByName(ingredient);
+            if(ingredientEntity.isPresent()){
+                ingredients.add(ingredientEntity.get());
+            }else{
+                Ingredient newIngredient = new Ingredient();
+                newIngredient.setName(ingredient);
+                newIngredient = ingredientRepository.save(newIngredient);
+                ingredients.add(newIngredient);
+            }
+        }
+
+        Meal meal = new Meal();
+        meal.setName(mealDTO.getName());
+        meal.setMealThumb(mealDTO.getMealThumb());
+        meal.setPublicId(mealDTO.getId());
+        meal.setArea(mealDTO.getArea());
+        meal.setIngredients(ingredients);
+
+        return this.mealRepository.save(meal);
     }
 }
 

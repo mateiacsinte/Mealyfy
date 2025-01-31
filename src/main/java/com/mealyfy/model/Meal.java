@@ -13,6 +13,7 @@ public class Meal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String publicId;
     private String name;
     private String category;
     private String area;

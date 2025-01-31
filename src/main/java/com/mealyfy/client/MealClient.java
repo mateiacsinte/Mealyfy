@@ -47,6 +47,12 @@ public class MealClient {
         return parseMealArray(mealsArray);
     }
 
+    public MealResponse fetchMealById(String id){
+        JsonArray mealsArray = this.doGetByRoute( "/lookup.php?i=" + id);
+
+        return parseMealArray(mealsArray).stream().findFirst().orElseThrow(() -> new RuntimeException("No meals found"));
+    }
+
     private JsonArray doGetByRoute(String route){
         String responseJson = restTemplate.getForObject(BASE_URL + route, String.class);
         JsonObject jsonObject = JsonParser.parseString(responseJson).getAsJsonObject();
